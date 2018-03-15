@@ -14,7 +14,7 @@ Only support iperf and iperf2, iperf3 is not applicable as it relies on special 
 
 ## Usage:
 
-Put the folder under the SDK ```examples``` folder
+Put the folder under the SDK ```examples``` folder, modify the IP address and port information in the user/user_main.c accordingly.
 ```bash
  $./gen_misc.sh
 ```
@@ -26,28 +26,33 @@ Plug a USB wifi dongle in the PC. Run it in the station mode and connect it to E
 
    Enable the macro UDP_TEST and UDP_RX in user/user_main.c
 
-   PC: iperf -c <ESP8266 IP> -t 10 -i 1 -u -b 100M
+   PC: iperf -c <DUT IP> -t 10 -i 1 -u -b 100M
+
 2. UDP TX
 
-    iperf -s -i 1 -u
+   Enable the macro UDP_TEST, disable UDP_RX in user/user_main.c
 
-    Enable the macro UDP_TEST, disable UDP_RX in user/user_main.c
+   PC: iperf -s -i 1 -u
+
 3. TCP RX
 
-   PC: iperf -c <ESP8266 IP> -t 10 -i 1 -b 100M
-
    Enable the macro TCP_TEST and TCP_RX in user/user_main.c
+
+   PC: iperf -c <DUT IP> -t 10 -i 1 -b 100M
+
 4. TCP TX
 
-    iperf -s -i 1
+   Enable the macro TCP_TEST, disable TCP_RX in user/user_main.c
 
-    Enable the macro TCP_TEST, disable TCP_RX in user/user_main.c
+   PC: iperf -s -i 1
 
 ## Statistics:
 
-  | Test Type | Throughput |
-  | ---: | --- |
-  | UDP UP (PC -> DUT) | 29.9 Mbps |
-  | UDP DOWN (DUT -> PC) | 15.2 Mbps |
-  | TCP UP (PC -> DUT) | 15.6 Mbps |
-  | TCP DOWN (DUT -> PC) | 6.7 Mbps |
+  | Test Type | Throughput | Comment |
+  | ---: | --- | --- |
+  | UDP RX | 29.9 Mbps | 
+  | UDP TX | 15.2 Mbps | buffer size 1460 |
+  | TCP RX | 15.6 Mbps | 
+  | TCP TX | 8.7 Mbps | buffer size 1440*2 * |
+
+  _* Due to the programming model limit in the espconn, we have to send the next TCP data in the TCP sent callback which is triggered by a TCP ACK, so we send out two packets in a row to avoid Delayed TCP ACK in the receiving end, otherwise TP drops significantly_ 
