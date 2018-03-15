@@ -29,11 +29,13 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 
+//#define SOFTAP_MODE
+
 #define TCP_TEST
 //#define UDP_TEST
 
 #ifdef TCP_TEST
-//#define TCP_RX
+#define TCP_RX
 #endif
 
 #ifdef UDP_TEST
@@ -42,6 +44,7 @@
 
 static struct espconn user_espconn;
 static os_timer_t test_timer;
+static os_timer_t connect_timer;
 #ifdef TCP_TEST
 static char buf[1440*2];
 #else
@@ -49,7 +52,7 @@ static char buf[1460];
 #endif
 static unsigned int sum = 0;
 static unsigned int p_sum = 0;
-static const char remote_ip[4] = {192,168,4,2};
+static const char remote_ip[4] = {192,168,1,100};
 static const remote_port = 5001;
 
 /******************************************************************************
@@ -166,7 +169,7 @@ void set_up_tcp ()
         user_espconn.type = ESPCONN_TCP;
         user_espconn.state = ESPCONN_NONE;
         user_espconn.proto.tcp = (esp_tcp*)zalloc(sizeof(esp_tcp));
-        user_espconn.proto.tcp->local_port = 2525;
+        user_espconn.proto.tcp->local_port = remote_port;
         espconn_set_opt(&user_espconn, ESPCONN_NODELAY);
 
 #ifdef TCP_RX
@@ -234,16 +237,44 @@ void set_up_udp ()
 }
 
 /************************ WiFi **********************/
-LOCAL void ICACHE_FLASH_ATTR on_client_connect()
+void start_tp_test (void)
 {
-    printf("freeheap %d\n", system_get_free_heap_size());
-    printf("A STA connected\n");
 #ifdef UDP_TEST
     set_up_udp();
 #endif
 #ifdef TCP_TEST
     set_up_tcp();
 #endif
+}
+
+LOCAL void ICACHE_FLASH_ATTR on_client_connect()
+{
+    printf("freeheap %d\n", system_get_free_heap_size());
+    printf("A STA connected\n");
+    start_tp_test();
+}
+
+LOCAL void ICACHE_FLASH_ATTR wait_for_connection_ready(uint8 flag)
+{
+    os_timer_disarm(&connect_timer);
+    if(wifi_station_connected()){
+        os_printf("connected to AP\n");
+        start_tp_test();
+    } else {
+        os_printf("reconnect after 2s\n");
+        os_timer_setfn(&connect_timer, (os_timer_func_t *)wait_for_connection_ready, NULL);
+        os_timer_arm(&connect_timer, 2000, 0);
+    }
+}
+
+LOCAL void ICACHE_FLASH_ATTR on_wifi_connect(){
+    os_timer_disarm(&connect_timer);
+    os_timer_setfn(&connect_timer, (os_timer_func_t *)wait_for_connection_ready, NULL);
+    os_timer_arm(&connect_timer, 100, 0);
+}
+
+LOCAL void ICACHE_FLASH_ATTR on_wifi_disconnect(uint8_t reason){
+    os_printf("disconnect %d\n", reason);
 }
 
 void print_test_info()
@@ -271,7 +302,15 @@ void user_init(void)
 {
     set_on_client_connect(on_client_connect);
     init_esp_wifi();
-    stop_wifi_station();
     print_test_info();
+    wifi_set_phy_mode(PHY_MODE_11N);
+#ifdef SOFTAP_MODE
+    stop_wifi_station();
     start_wifi_ap("ESP_TEST1", "12345678");
+#else
+    set_on_station_connect(on_wifi_connect);
+    set_on_station_disconnect(on_wifi_disconnect);
+    stop_wifi_ap();
+    start_wifi_station("tplink886", "12345678");
+#endif
 }
