@@ -25,8 +25,8 @@
 #ifndef __USER_CONFIG_H__
 #define __USER_CONFIG_H__
 
-#define SSID "FreeThink"
-#define PASSWORD "Ftsz@2017"
+#define SSID "abc@123"
+#define PASSWORD "12345678"
 
 #endif
 

@@ -29,8 +29,8 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 
-//#define TCP_TEST
-#define UDP_TEST
+#define TCP_TEST
+//#define UDP_TEST
 
 #ifdef TCP_TEST
 //#define TCP_RX
@@ -42,11 +42,15 @@
 
 static struct espconn user_espconn;
 static os_timer_t test_timer;
-//static char buf[1440];  // magic number, traffic is slow with buf size below this
+#ifdef TCP_TEST
+static char buf[1440*2];
+#else
 static char buf[1460];
+#endif
 static unsigned int sum = 0;
 static unsigned int p_sum = 0;
-static const char remote_ip[] = {192,168,4,2};
+static const char remote_ip[4] = {192,168,4,2};
+static const remote_port = 5001;
 
 /******************************************************************************
  * FunctionName : user_rf_cal_sector_set
@@ -172,10 +176,9 @@ void set_up_tcp ()
 
         printf("espconn_accept [%d] !!! \r\n", ret);
 #else
-        const char esp_tcp_server_ip[4] = {192, 168, 4, 2}; // remote IP of TCP server
-        memcpy(user_espconn.proto.tcp->remote_ip, esp_tcp_server_ip, 4);
+        memcpy(user_espconn.proto.tcp->remote_ip, remote_ip, sizeof(remote_ip));
 
-        user_espconn.proto.tcp->remote_port = 5001;
+        user_espconn.proto.tcp->remote_port = remote_port;
 
         espconn_regist_connectcb(&user_espconn, user_tcp_connect_cb); // register connect callback
         espconn_regist_reconcb(&user_espconn, user_tcp_recon_cb); // register reconnect callback as error handler
@@ -210,18 +213,16 @@ void ICACHE_FLASH_ATTR user_udp_recv_cb(void *arg,
 
 void set_up_udp ()
 {
-        printf("Local port 5001, remote port 5001\r\n");
         user_espconn.type = ESPCONN_UDP;
         user_espconn.proto.udp = (esp_udp*)zalloc(sizeof(esp_udp));
-        user_espconn.proto.udp->local_port = 5001;
-        user_espconn.proto.udp->remote_port = 5001;
+        user_espconn.proto.udp->local_port = remote_port;
+        user_espconn.proto.udp->remote_port = remote_port;
 
-        const char udp_remote_ip[] = {192,168,4,2}; //用于存放远程IP地址
-        memcpy(&user_espconn.proto.udp->remote_ip, udp_remote_ip, sizeof(udp_remote_ip));
+        memcpy(&user_espconn.proto.udp->remote_ip, remote_ip, sizeof(remote_ip));
 
-        espconn_regist_recvcb(&user_espconn, user_udp_recv_cb); //接收回调函数
-        espconn_regist_sentcb(&user_espconn, user_udp_sent_cb); //发送回调函数
-        espconn_create(&user_espconn); //创建UDP连接
+        espconn_regist_recvcb(&user_espconn, user_udp_recv_cb);
+        espconn_regist_sentcb(&user_espconn, user_udp_sent_cb);
+        espconn_create(&user_espconn);
 
 #ifdef UDP_RX
         monitor_rx();
@@ -256,7 +257,7 @@ void print_test_info()
            "TX"
 #endif
 #else
-    "TCP "
+    ">> TCP "
 #ifdef TCP_RX
            "RX"
 #else
@@ -273,5 +274,4 @@ void user_init(void)
     stop_wifi_station();
     print_test_info();
     start_wifi_ap("ESP_TEST1", "12345678");
-
 }
