@@ -53,6 +53,6 @@ Plug a USB wifi dongle in the PC. Run it in the station mode and connect it to E
   | UDP RX | 29.9 Mbps | 
   | UDP TX | 15.2 Mbps | buffer size 1460 |
   | TCP RX | 15.6 Mbps | 
-  | TCP TX | 8.7 Mbps | buffer size 1440*2 * |
+  | TCP TX | 10.2 Mbps | buffer size 1440*2 * |
 
   _* Due to the programming model limit in the espconn, we have to send the next TCP data in the TCP sent callback which is triggered by a TCP ACK, so we send out two packets in a row to avoid Delayed TCP ACK in the receiving end, otherwise TP drops significantly_ 
