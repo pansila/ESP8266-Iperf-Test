@@ -49,6 +49,7 @@ Plug a USB wifi dongle in the PC. Run it in the station mode and connect it to E
 ## Statistics:
 
 * SoftAP mode
+
   | Test Type | Throughput | Comment |
   | ---: | --- | --- |
   | UDP RX | 29.9 Mbps | 
