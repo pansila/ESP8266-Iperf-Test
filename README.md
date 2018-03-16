@@ -53,58 +53,28 @@ Plug a USB wifi dongle in the PC. Run it in the station mode and connect it to E
 
   * RTOS SDK 2.2
 
-    | | Test Type | Throughput | Comment |
-    | --- | ---: | --- | --- |
-    | SoftAP Mode (Open) |
-    | | UDP RX | 14.9 Mbps | 
-    | | UDP TX | 11.1 Mpbs | buffer size 1460 * |
-    | | TCP RX | 7.2 Mpbs | 
-    | | TCP TX | 7.2 Mpbs | buffer size 1440*2 ** |
-    | SoftAP Mode (WPA2) |
-    | | UDP RX | 14.5 Mbps | 
-    | | UDP TX | 11.1 Mbps | buffer size 1460 *** |
-    | | TCP RX | 6.5 Mbps | 
-    | | TCP TX | 6.7 Mbps | buffer size 1440*2 |
-    | Station Mode (Open) |
-    | | UDP RX | 10.2 Mbps | 
-    | | UDP TX |  | buffer size 1460, crashed |
-    | | TCP RX | 5.1 Mbps | 
-    | | TCP TX |  4.3 Mbps | buffer size 1440*2 |
-    | Station Mode (WPA2) |
-    | | UDP RX | 10.5 Mbps | 
-    | | UDP TX |  | buffer size 1460, crashed |
-    | | TCP RX | 5.9 Mbps | 
-    | | TCP TX | 4.5 Mbps | buffer size 1440*2 |
+    | Test Case | SoftAP (Open) | SoftAP (WPA2) | Station (Open) | Station (WPA2) | Comment |
+    | --- | --- | --- | --- | --- | --- |
+    | UDP RX | 14.9 Mbps | 14.5 Mbps | 10.2 Mbps | 10.5 Mbps | 
+    | UDP TX * | 11.1 Mpbs | 11.1 Mbps | N/A ** | N/A | buffer size 1460 *** |
+    | TCP RX | 7.2 Mpbs | 6.5 Mbps | 5.1 Mbps | 5.9 Mbps |
+    | TCP TX | 7.2 Mpbs | 6.7 Mbps | 4.3 Mbps | 4.5 Mbps | buffer size 1440*2 **** |
 
-    _* AMPDU is not applied and OFDM date rate (11g) instead of HT rate (11n) is used when sending frames in my case, that's probably why the TP reduces a lot compared to RX case_
+    _* AMPDU is not applied and OFDM date rate (11g) instead of HT rate (11n) is used when sending frames in my case, that's probably why the TP reduces a lot compared to RX case._
 
-    _** Due to the programming model limit in the espconn, we have to send the next TCP data in the TCP sent callback which is triggered by a TCP ACK, so we send out two packets in a row to avoid Delayed TCP ACK in the receiving end, otherwise TP drops significantly_
+    _** Crash happens repeatedly, no result._
 
-    _*** Buffer size is carefully chosen to work with the MSS size of TCP/UDP to reduce the TP penalty by the ineffcient fragmentation._
+    _*** Buffer size has been carefully chosen to work with the MSS size of TCP/UDP to reduce the TP penalty by the ineffcient fragmentation._
+
+    _**** Due to the programming model limit in the espconn, we have to send the next TCP data in the TCP sent callback which is triggered by a TCP ACK, so we send out two packets in a row to avoid Delayed TCP ACK in the receiving end, otherwise TP drops significantly._
 
   * RTOS SDK 1.4.x
   
-    | | Test Type | Throughput | Comment |
-    | --- | ---: | --- | --- |
-    | SoftAP Mode (Open) |
-    | | UDP RX | 27.6 Mbps | 
-    | | UDP TX | 17.1 Mpbs | buffer size 1460 |
-    | | TCP RX | 16.5 Mpbs | 
-    | | TCP TX | 11.2 Mpbs | buffer size 1440*2 |
-    | SoftAP Mode (WPA2) |
-    | | UDP RX | 26.5 Mbps | 
-    | | UDP TX |  | buffer size 1460, crashed |
-    | | TCP RX | 15.5 Mbps | 
-    | | TCP TX | 10.1 Mbps | buffer size 1440*2 |
-    | Station Mode (Open) |
-    | | UDP RX | 28.3 Mbps | 
-    | | UDP TX |  | buffer size 1460, crashed |
-    | | TCP RX | 11.5 Mbps | 
-    | | TCP TX | 5.8 Mbps | buffer size 1440*2 |
-    | Station Mode (WPA2) |
-    | | UDP RX | 27.3 Mbps | 
-    | | UDP TX |  | buffer size 1460, crashed |
-    | | TCP RX | 11.2 Mbps | 
-    | | TCP TX | 5.2 Mbps | buffer size 1440*2 |
+    | Test Case | SoftAP (Open) | SoftAP (WPA2) | Station (Open) | Station (WPA2) | Comment |
+    | --- | --- | --- | --- | --- | --- |
+    | UDP RX | 27.6 Mbps | 26.5 Mbps | 28.3 Mbps | 27.3 Mbps | 
+    | UDP TX | 17.1 Mpbs | N/A | N/A | N/A | buffer size 1460 |
+    | TCP RX | 16.5 Mpbs | 15.5 Mbps | 11.5 Mbps | 11.2 Mbps |
+    | TCP TX | 11.2 Mpbs | 10.1 Mbps | 5.8 Mbps | 5.2 Mbps | buffer size 1440*2 |
 
     Throughtput of RTOS SDK 1.4.x is better all around than RTOS SDK 2.2
