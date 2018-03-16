@@ -15,7 +15,7 @@ Only support iperf and iperf2, iperf3 is not applicable as it relies on special 
 
 ## Usage:
 
-Put the folder under the SDK ```examples``` folder, modify the IP address and port information in the user/user_main.c accordingly. Specify the SDK path in the ```gen_misc.sh```.
+Put the folder under the SDK ```examples``` folder, modify the IP address and port information in the user/user_main.c accordingly. Specify the SDK path in the ```gen_misc.sh```. Build the image:
 ```bash
  $./gen_misc.sh
 ```
@@ -80,7 +80,7 @@ Plug a USB wifi dongle in the PC. Run it in the station mode and connect it to E
 
     _** Due to the programming model limit in the espconn, we have to send the next TCP data in the TCP sent callback which is triggered by a TCP ACK, so we send out two packets in a row to avoid Delayed TCP ACK in the receiving end, otherwise TP drops significantly_
 
-    _*** Buffer size is carefully chosen to work with the MSS size of TCP/UDP to reduce the TP penalty by the ineffcient fragmentation.
+    _*** Buffer size is carefully chosen to work with the MSS size of TCP/UDP to reduce the TP penalty by the ineffcient fragmentation._
 
   * RTOS SDK 1.4.x
   
