@@ -35,7 +35,7 @@
 //#define UDP_TEST
 
 #ifdef TCP_TEST
-#define TCP_RX
+//#define TCP_RX
 #endif
 
 #ifdef UDP_TEST
@@ -45,14 +45,26 @@
 static struct espconn user_espconn;
 static os_timer_t test_timer;
 static os_timer_t connect_timer;
+#ifdef SOFTAP_MODE
 #ifdef TCP_TEST
-static char buf[1440*2];
+static char buf[1440*2];  // seems different MSS for softAP and station mode
 #else
 static char buf[1460];
 #endif
+#else
+#ifdef TCP_TEST
+static char buf[1460*2];
+#else
+static char buf[1460];
+#endif
+#endif
 static unsigned int sum = 0;
 static unsigned int p_sum = 0;
+#ifdef SOFTAP_MODE
+static const char remote_ip[4] = {192,168,4,2};
+#else
 static const char remote_ip[4] = {192,168,1,100};
+#endif
 static const remote_port = 5001;
 
 /******************************************************************************
@@ -198,7 +210,7 @@ void ICACHE_FLASH_ATTR user_udp_send(void *data)
 
         while (1) {
                 ret = espconn_send(&user_espconn, buf, sizeof(buf));
-                //if (ret) os_delay_us(5000);
+                //if (ret) os_delay_us(1000);
         }
 }
 

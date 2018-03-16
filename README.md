@@ -53,8 +53,22 @@ Plug a USB wifi dongle in the PC. Run it in the station mode and connect it to E
   | Test Type | Throughput | Comment |
   | ---: | --- | --- |
   | UDP RX | 29.9 Mbps | 
-  | UDP TX | 15.2 Mbps | buffer size 1460 |
+  | UDP TX | 15.2 Mbps | buffer size 1460 * |
   | TCP RX | 16.9 Mbps | 
   | TCP TX | 10.2 Mbps | buffer size 1440*2 * |
 
-  _* Due to the programming model limit in the espconn, we have to send the next TCP data in the TCP sent callback which is triggered by a TCP ACK, so we send out two packets in a row to avoid Delayed TCP ACK in the receiving end, otherwise TP drops significantly_ 
+  _* AMPDU is not applied and OFDM date rate (11g) instead of HT rate (11n) is used when sending frames in my case, that's probably why the TP reduces a lot compared to RX case_
+
+  _** Due to the programming model limit in the espconn, we have to send the next TCP data in the TCP sent callback which is triggered by a TCP ACK, so we send out two packets in a row to avoid Delayed TCP ACK in the receiving end, otherwise TP drops significantly_
+  
+* Station Mode
+  | Test Type | Throughput | Comment |
+  | ---: | --- | --- |
+  | UDP RX | 10.5 Mbps | 
+  | UDP TX |  | buffer size 1460, crashed |
+  | TCP RX | 5.9 Mbps | 
+  | TCP TX | 4.5 Mbps | buffer size 1440*2 |
+
+  It's weird that TP drops all around compared to SoftAP mode. AMPDU and HT date rate are not applied either, but don't see many retries and rate is pretty good (54M and 72M). It's still possible to reach a reasonable high speed with the limits, probably software processing distinction is the culprit.
+
+  
