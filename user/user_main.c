@@ -29,18 +29,23 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 
+/************* test matrix*****************
+ * WiFi mode, encrypt mode, TCP/UDP, TX/RX
+ ******************************************/
 //#define SOFTAP_MODE
+#define ENCYP_WPA2
 
-#define TCP_TEST
-//#define UDP_TEST
+//#define TCP_TEST
+#define UDP_TEST
 
 #ifdef TCP_TEST
-//#define TCP_RX
+#define TCP_RX
 #endif
 
 #ifdef UDP_TEST
-//#define UDP_RX
+#define UDP_RX
 #endif
+/*******************************************/
 
 static struct espconn user_espconn;
 static os_timer_t test_timer;
@@ -53,7 +58,8 @@ static char buf[1460];
 #endif
 #else
 #ifdef TCP_TEST
-static char buf[1460*2];
+//static char buf[1460*2];  // for SDK 2.2
+static char buf[1440*2];   // for SDK 1.4.x
 #else
 static char buf[1460];
 #endif
@@ -63,7 +69,7 @@ static unsigned int p_sum = 0;
 #ifdef SOFTAP_MODE
 static const char remote_ip[4] = {192,168,4,2};
 #else
-static const char remote_ip[4] = {192,168,1,100};
+static const char remote_ip[4] = {192,168,1,102};
 #endif
 static const remote_port = 5001;
 
@@ -292,22 +298,33 @@ LOCAL void ICACHE_FLASH_ATTR on_wifi_disconnect(uint8_t reason){
 void print_test_info()
 {
     printf(
+           ">> "
+#ifdef SOFTAP_MODE
+           "softAP "
+#else
+           "station "
+#endif
+#ifdef ENCYP_WPA2
+           "WPA2 "
+#else
+           "Open "
+#endif
 #ifdef UDP_TEST
-    ">> UDP "
+    "UDP "
 #ifdef UDP_RX
            "RX"
 #else
            "TX"
 #endif
 #else
-    ">> TCP "
+    "TCP "
 #ifdef TCP_RX
            "RX"
 #else
            "TX"
 #endif
 #endif
-           " test <<\r\n");
+           " test on channel %d <<\r\n",  wifi_get_channel());
 }
 
 void user_init(void)
@@ -318,11 +335,23 @@ void user_init(void)
     wifi_set_phy_mode(PHY_MODE_11N);
 #ifdef SOFTAP_MODE
     stop_wifi_station();
-    start_wifi_ap("ESP_TEST1", "12345678");
+    start_wifi_ap("ESP_TEST1",
+#ifdef ENCYP_WPA2
+                        "12345678"
+#else
+                        NULL
+#endif
+                      );
 #else
     set_on_station_connect(on_wifi_connect);
     set_on_station_disconnect(on_wifi_disconnect);
     stop_wifi_ap();
-    start_wifi_station("tplink886", "12345678");
+    start_wifi_station("tplink886",
+#ifdef ENCYP_WPA2
+                        "12345678"
+#else
+                        NULL
+#endif
+                      );
 #endif
 }

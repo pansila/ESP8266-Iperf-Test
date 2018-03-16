@@ -214,7 +214,8 @@ bool ICACHE_FLASH_ATTR start_wifi_ap(const char * ssid, const char * pass){
     config.max_connection = 1;
     sprintf(config.ssid, ssid);
     config.ssid_len = strlen(ssid);
-    if (pass){
+    if (pass) {
+        config.authmode = AUTH_WPA_WPA2_PSK;
         sprintf(config.password, pass);
     }
     return wifi_softap_set_config(&config);
