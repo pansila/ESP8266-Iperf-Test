@@ -55,7 +55,7 @@ Plug a USB wifi dongle in the PC. Run it in the station mode and connect it to E
 
     | Test Case | SoftAP (Open) | SoftAP (WPA2) | Station (Open) | Station (WPA2) | Comment |
     | --- | --- | --- | --- | --- | --- |
-    | UDP RX | 14.9 Mbps | 14.5 Mbps | 10.2 Mbps | 10.5 Mbps | 
+    | UDP RX | 14.9 Mbps | 14.5 Mbps | 10.2 Mbps | 10.5 Mbps |
     | UDP TX * | 11.1 Mpbs | 11.1 Mbps | N/A ** | N/A | buffer size 1460 *** |
     | TCP RX | 7.2 Mpbs | 6.5 Mbps | 5.1 Mbps | 5.9 Mbps |
     | TCP TX | 7.2 Mpbs | 6.7 Mbps | 4.3 Mbps | 4.5 Mbps | buffer size 1440*2 **** |
@@ -72,7 +72,7 @@ Plug a USB wifi dongle in the PC. Run it in the station mode and connect it to E
   
     | Test Case | SoftAP (Open) | SoftAP (WPA2) | Station (Open) | Station (WPA2) | Comment |
     | --- | --- | --- | --- | --- | --- |
-    | UDP RX | 27.6 Mbps | 26.5 Mbps | 28.3 Mbps | 27.3 Mbps | 
+    | UDP RX | 27.6 Mbps | 26.5 Mbps | 28.3 Mbps | 27.3 Mbps |
     | UDP TX | 17.1 Mpbs | N/A | N/A | N/A | buffer size 1460 |
     | TCP RX | 16.5 Mpbs | 15.5 Mbps | 11.5 Mbps | 11.2 Mbps |
     | TCP TX | 11.2 Mpbs | 10.1 Mbps | 5.8 Mbps | 5.2 Mbps | buffer size 1440*2 |

@@ -39,11 +39,11 @@
 #define UDP_TEST
 
 #ifdef TCP_TEST
-#define TCP_RX
+//#define TCP_RX
 #endif
 
 #ifdef UDP_TEST
-#define UDP_RX
+//#define UDP_RX
 #endif
 /*******************************************/
 
@@ -157,6 +157,13 @@ void user_tcp_recon_cb (void *arg, sint8 err)
         printf("user_tcp_recon_cb !!! \r\n");
 }
 
+void user_tcp_write_finish(void *arg)
+{
+        struct espconn *pespconn = arg;
+
+        espconn_send(&user_espconn, buf, sizeof(buf));
+}
+
 void user_tcp_connect_cb(void *arg)
 {
         struct espconn *pespconn = arg;
@@ -166,6 +173,10 @@ void user_tcp_connect_cb(void *arg)
         espconn_regist_recvcb(pespconn, user_tcp_recv_cb);
         espconn_regist_sentcb(pespconn, user_tcp_sent_cb);
         espconn_regist_disconcb(pespconn, user_tcp_discon_cb);
+
+        //espconn_set_opt(pespconn, ESPCONN_COPY | ESPCONN_NODELAY); // enable write buffer copy, disable Nalgo
+        //espconn_regist_write_finish(pespconn, user_tcp_write_finish); // register write finish callback
+        espconn_set_opt(pespconn, ESPCONN_NODELAY); // enabling write buffer copy reduces TP
 
         user_tcp_send(NULL);
 }
@@ -188,9 +199,9 @@ void set_up_tcp ()
         user_espconn.state = ESPCONN_NONE;
         user_espconn.proto.tcp = (esp_tcp*)zalloc(sizeof(esp_tcp));
         user_espconn.proto.tcp->local_port = remote_port;
-        espconn_set_opt(&user_espconn, ESPCONN_NODELAY);
 
 #ifdef TCP_RX
+        //espconn_set_opt(&user_espconn, ESPCONN_NODELAY);
         espconn_regist_connectcb(&user_espconn, user_tcp_listen_cb);
 
         sint8 ret = espconn_accept(&user_espconn);
@@ -222,6 +233,7 @@ void ICACHE_FLASH_ATTR user_udp_send(void *data)
 
 void ICACHE_FLASH_ATTR user_udp_sent_cb(void *arg)
 {
+        // crash occurs even send the data in the callback
         //espconn_send(&user_espconn, buf, sizeof(buf));
 }
 
@@ -331,6 +343,7 @@ void user_init(void)
 {
     set_on_client_connect(on_client_connect);
     init_esp_wifi();
+    espconn_init();
     print_test_info();
     wifi_set_phy_mode(PHY_MODE_11N);
 #ifdef SOFTAP_MODE
